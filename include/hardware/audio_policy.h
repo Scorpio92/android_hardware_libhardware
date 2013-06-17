@@ -248,6 +248,10 @@ struct audio_policy {
 
     /* dump state */
     int (*dump)(const struct audio_policy *pol, int fd);
+
+    #ifdef MTK_AUDIO
+    int (*set_policy_parameters)(struct audio_policy *pol,int par1, int par2 ,int par3,int par4);
+    #endif
 };
 
 struct audio_policy_service_ops {
@@ -326,6 +330,7 @@ struct audio_policy_service_ops {
     int (*close_input)(void *service, audio_io_handle_t input, uint32_t *inputClientId);
 #else
                                     uint32_t acoustics);
+
     /* closes an audio input */
     int (*close_input)(void *service, audio_io_handle_t input);
 #endif

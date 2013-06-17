@@ -34,7 +34,11 @@ __BEGIN_DECLS
 /**
  * The id of this module
  */
+#ifdef MTK_AUDIO
+#define AUDIO_HARDWARE_MODULE_ID "libaudio"
+#else
 #define AUDIO_HARDWARE_MODULE_ID "audio"
+#endif
 
 /**
  * Name of the audio devices to open
@@ -344,6 +348,24 @@ struct audio_hw_device {
 
     /** This method dumps the state of the audio hardware */
     int (*dump)(const struct audio_hw_device *dev, int fd);
+
+    /**  add by chipeng to fit hardware extension   **/
+    int (*SetEMParameter)(struct audio_hw_device *dev,void *ptr , int len);
+    int (*GetEMParameter)(struct audio_hw_device *dev,void *ptr , int len);
+    int (*SetAudioCommand)(struct audio_hw_device *dev,int par1 , int par2);
+    int (*GetAudioCommand)(struct audio_hw_device *dev,int par1);
+    int (*SetAudioData)(struct audio_hw_device *dev,int par1,size_t len,void *ptr);
+    int (*GetAudioData)(struct audio_hw_device *dev,int par1,size_t len,void *ptr);
+    int (*SetACFPreviewParameter)(struct audio_hw_device *dev,void *ptr , int len);
+    int (*SetHCFPreviewParameter)(struct audio_hw_device *dev,void *ptr , int len);
+
+    int (*xWayPlay_Start)(struct audio_hw_device *dev,int sample_rate);
+    int (*xWayPlay_Stop)(struct audio_hw_device *dev);
+    int (*xWayPlay_Write)(struct audio_hw_device *dev,void* buffer ,int size_bytes);
+    int (*xWayPlay_GetFreeBufferCount)(struct audio_hw_device *dev);
+    int (*xWayRec_Start)(struct audio_hw_device *dev,int smple_rate);
+    int (*xWayRec_Stop)(struct audio_hw_device *dev);
+    int (*xWayRec_Read)(struct audio_hw_device *dev,void* buffer , int size_bytes);
 };
 typedef struct audio_hw_device audio_hw_device_t;
 

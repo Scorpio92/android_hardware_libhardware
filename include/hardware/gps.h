@@ -36,7 +36,11 @@ __BEGIN_DECLS
 typedef int64_t GpsUtcTime;
 
 /** Maximum number of SVs for gps_sv_status_callback(). */
+#if MTK_HARDWARE
+#define GPS_MAX_SVS 256
+#else
 #define GPS_MAX_SVS 32
+#endif
 
 /** Requested operational mode for GPS operation. */
 typedef uint32_t GpsPositionMode;
@@ -286,18 +290,30 @@ typedef struct {
     /** Represents a bit mask indicating which SVs
      * have ephemeris data.
      */
+#if MTK_HARDWARE
+    uint32_t    ephemeris_mask[8];
+#else
     uint32_t    ephemeris_mask;
+#endif
 
     /** Represents a bit mask indicating which SVs
      * have almanac data.
      */
+#if MTK_HARDWARE
+    uint32_t    almanac_mask[8];
+#else
     uint32_t    almanac_mask;
+#endif
 
     /**
      * Represents a bit mask indicating which SVs
      * were used for computing the most recent position fix.
      */
+#if MTK_HARDWARE
+    uint32_t    used_in_fix_mask[8];
+#else
     uint32_t    used_in_fix_mask;
+#endif
 } GpsSvStatus;
 
 /* 2G and 3G */
@@ -427,6 +443,11 @@ typedef struct {
 
     /** Get a pointer to extension information. */
     const void* (*get_extension)(const char* name);
+#if MTK_HARDWARE
+    /** EPO file */
+    int (*epo_file_time) (long long uTime[]);
+    int (*epo_file_update) (void);
+#endif
 } GpsInterface;
 
 /** Callback to request the client to download XTRA data.

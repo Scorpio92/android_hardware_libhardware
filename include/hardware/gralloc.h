@@ -106,6 +106,13 @@ enum {
     GRALLOC_USAGE_PRIVATE_2             = 0x40000000,
     GRALLOC_USAGE_PRIVATE_3             = 0x80000000,
     GRALLOC_USAGE_PRIVATE_MASK          = 0xF0000000,
+#if MTK_HARDWARE
+    GRALLOC_USAGE_S3D_RESERVED       = 0x00100000,
+    GRALLOC_USAGE_S3D_SIDE_BY_SIDE   = 0x00200000,
+    GRALLOC_USAGE_S3D_TOP_AND_BOTTOM = 0x00400000,
+    GRALLOC_USAGE_S3D_LR_SWAPPED     = 0x00800000,
+    GRALLOC_USAGE_S3D_MASK           = 0x00F00000,
+#endif
 };
 
 /*****************************************************************************/

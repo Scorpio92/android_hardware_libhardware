@@ -23,6 +23,12 @@
 #include <hardware/gralloc.h>
 #include <hardware/hardware.h>
 #include <cutils/native_handle.h>
+#ifdef MTK_HARDWARE
+#include <utils/threads.h>
+
+#include <utils/RefBase.h>
+#include <ui/GraphicBuffer.h>
+#endif//MTK_HARDWARE
 
 __BEGIN_DECLS
 
@@ -94,6 +100,10 @@ enum {
      * by SurfaceFlinger (just as if compositionType was set to HWC_OVERLAY).
      */
     HWC_SKIP_LAYER         = 0x00000001,
+#ifdef MTK_HARDWARE
+    HWC_DIRTY_LAYER = 0x20000000,
+    HWC_DIM_LAYER  = 0x40000000,
+#endif//MTK_HARDWARE
 };
 
 /*
@@ -105,8 +115,14 @@ enum {
 
     /* this layer will be handled in the HWC */
     HWC_OVERLAY = 1,
+#ifdef MTK_HARDWARE
+    HWC_OVERLAY_EX = 2,
+#endif//MTK_HARDWARE
 };
 
+#ifdef MTK_HARDWARE
+static const char *compositionTypeName[] = { "GPU", "OVL", "OEX" };
+#endif//MTK_HARDWARE
 /*
  * hwc_layer_t::blending values
  */
@@ -166,7 +182,11 @@ typedef struct hwc_layer {
 
     /* handle of buffer to compose. this handle is guaranteed to have been
      * allocated with gralloc */
+#ifndef MTK_HARDWARE
     buffer_handle_t handle;
+#else
+    android::sp<android::GraphicBuffer> graphicBuffer;
+#endif//MTK_HARDWARE
 
     /* transformation to apply to the buffer during composition */
     uint32_t transform;
@@ -194,6 +214,17 @@ typedef struct hwc_layer {
      * The visible region INCLUDES areas overlapped by a translucent layer.
      */
     hwc_region_t visibleRegionScreen;
+#ifdef MTK_HARDWARE
+    int32_t connectedApi;
+    int32_t identity;
+    android::Mutex *mutex;
+    //uint32_t flagsEx;
+    //uint32_t s3dBufferFlags;
+    //int32_t  s3dManualOffset;
+    //uint32_t bufferTransform;
+    int32_t dimColor;
+    float transformMatrix[9];
+#endif//MTK_HARDWARE
 } hwc_layer_t;
 
 
@@ -214,6 +245,10 @@ enum {
      */
     HWC_SKIP_COMPOSITION = 0x00000002
 #endif
+#ifdef MTK_HARDWARE
+    HWC_SWAP_REQUIRED = 0x00000002,
+    HWC_LAYERSCREENSHOT_EXIST = 0x00000004,
+#endif//MTK_HARDWARE
 
 };
 
@@ -224,6 +259,10 @@ enum {
 typedef struct hwc_layer_list {
     uint32_t flags;
     size_t numHwLayers;
+#if 0//def MTK_HARDWARE
+    uint8_t composingOrientation;
+    uint8_t composingPhase;
+#endif//MTK_HARDWARE
     hwc_layer_t hwLayers[0];
 } hwc_layer_list_t;
 
@@ -357,6 +396,7 @@ typedef struct hwc_composer_device {
     void (*registerProcs)(struct hwc_composer_device* dev,
             hwc_procs_t const* procs);
 
+#ifndef MTK_HARDWARE
     void* reserved_proc[6];
 
 #ifdef QCOM_HARDWARE
@@ -366,7 +406,11 @@ typedef struct hwc_composer_device {
      */
     void (*perform)(struct hwc_composer_device* dev, int event, int value);
 #endif
+#else
+    int (*opengl_bypass)();
 
+    void* reserved_proc[5];
+#endif//MTK_HARDWARE
 } hwc_composer_device_t;
 
 
